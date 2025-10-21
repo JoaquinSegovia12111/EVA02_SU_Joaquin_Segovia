@@ -16,7 +16,7 @@ Características:
 - Salir con 's' o 'salir' en cualquier prompt
 - Números con máximo dos decimales
 - Instrucciones paso a paso en español (locale=es)
-- Viaje desde "tu casa" hacia "la sede"
+- Viaje desde una ubicación de origen a una ubicación de destino
 """
 
 import os
@@ -169,7 +169,7 @@ def main():
     if not api_key or len(api_key) < 10:
         api_key = pedir("Escribe tu API Key de GraphHopper: ")
 
-    print("\n=== Configuración del viaje (casa a sede) ===")
+    print("\n=== Configuración del viaje (origen a destino) ===")
     print("Puedes salir en cualquier momento escribiendo 's' o 'salir'.\n")
 
     print("Perfiles disponibles: car (auto), bike (bicicleta), foot (a pie)")
@@ -177,11 +177,11 @@ def main():
     if vehiculo not in PERFILES_VALIDOS:
         vehiculo = "car"
 
-    casa = pedir("Dirección de tu casa: ")
-    sede = pedir("Dirección de la sede: ")
+    origen = pedir("Ubicación de origen: ")
+    destino = pedir("Ubicación de destino: ")
 
-    s1, lat1, lng1, etq1 = geocodificar(casa, api_key)
-    s2, lat2, lng2, etq2 = geocodificar(sede, api_key)
+    s1, lat1, lng1, etq1 = geocodificar(origen, api_key)
+    s2, lat2, lng2, etq2 = geocodificar(destino, api_key)
 
     print("=" * 60)
     if s1 == 200 and s2 == 200 and lat1 is not None and lat2 is not None:
