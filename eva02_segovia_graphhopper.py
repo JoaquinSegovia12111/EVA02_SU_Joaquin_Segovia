@@ -26,8 +26,7 @@ import urllib.parse
 from typing import Tuple, Dict, Any, Optional
 
 GEOCODE_URL = "https://graphhopper.com/api/1/geocode?"
-ROUTE_URL   = "https://graphhopper.com/api/1/route?"
-# Tu API Key (ya incluida):
+ROUTE_URL = "https://graphhopper.com/api/1/route?"
 DEFAULT_API_KEY = "65975508-0ef0-4071-b644-1fbd519dedf9"
 
 PERFILES_VALIDOS = {"car", "bike", "foot"}  # car=auto, bike=bicicleta, foot=a pie
@@ -45,9 +44,9 @@ def obtener_api_key() -> str:
 def geocodificar(direccion: str, key: str) -> Tuple[int, Optional[float], Optional[float], str]:
     direccion = (direccion or "").strip()
     while direccion == "":
-        direccion = input("⚠️  La dirección no puede ser vacía. Escribe nuevamente: ").strip()
+        direccion = input("La dirección no puede ser vacía. Escribe nuevamente: ").strip()
         if salir_si_corresponde(direccion):
-            print("Saliendo…")
+            print("Saliendo...")
             sys.exit(0)
 
     params = {"q": direccion, "limit": "1", "key": key}
@@ -58,7 +57,7 @@ def geocodificar(direccion: str, key: str) -> Tuple[int, Optional[float], Option
         status = resp.status_code
         data = resp.json()
     except Exception as exc:
-        print(f"[Geocodificación] Error de red/parseo: {exc}")
+        print(f"[Geocodificación] Error de red o parseo: {exc}")
         return 0, None, None, direccion
 
     if status == 200 and isinstance(data, dict) and len(data.get("hits", [])) > 0:
@@ -78,8 +77,8 @@ def geocodificar(direccion: str, key: str) -> Tuple[int, Optional[float], Option
         else:
             etiqueta = nombre
 
-        print(f"\n📍 Geocodificado: {etiqueta} (tipo: {tipo})")
-        print(f"   URL geocodificación: {url}\n")
+        print(f"\nGeocodificado: {etiqueta} (tipo: {tipo})")
+        print(f"URL de geocodificación: {url}\n")
         return status, float(lat), float(lng), etiqueta
 
     msg = data.get("message") if isinstance(data, dict) else None
@@ -108,7 +107,7 @@ def rutear(origen: Tuple[float, float],
     params = {"key": key, "vehicle": vehiculo, "locale": "es"}
     base = ROUTE_URL + urllib.parse.urlencode(params) + op + dp
 
-    print("🛣️  URL de ruteo:")
+    print("URL de ruteo:")
     print(base)
     print("=" * 60)
 
@@ -117,7 +116,7 @@ def rutear(origen: Tuple[float, float],
         status = resp.status_code
         data = resp.json()
     except Exception as exc:
-        return {"error": f"Error de red/parseo: {exc}"}
+        return {"error": f"Error de red o parseo: {exc}"}
 
     if status != 200:
         return {"error": data.get("message", f"HTTP {status}")}
@@ -133,10 +132,10 @@ def imprimir_resumen(paths_data: Dict[str, Any], etiqueta_origen: str, etiqueta_
     km = dist_m / 1000.0
     millas = km / 1.61
 
-    print(f"🚗 Indicaciones desde {etiqueta_origen} hasta {etiqueta_destino} en {vehiculo}")
+    print(f"Indicaciones desde {etiqueta_origen} hasta {etiqueta_destino} en {vehiculo}")
     print("=" * 60)
     print(f"Distancia: {km:.2f} km / {millas:.2f} millas")
-    print(f"Duración:  {formatear_duracion_ms(tiempo_ms)}")
+    print(f"Duración: {formatear_duracion_ms(tiempo_ms)}")
     print("=" * 60)
 
 
@@ -146,7 +145,7 @@ def imprimir_paso_a_paso(paths_data: Dict[str, Any]):
         print("No hay instrucciones paso a paso disponibles.")
         return
 
-    print("🧭 Narrativa del viaje (paso a paso):")
+    print("Narrativa del viaje (paso a paso):")
     print("=" * 60)
     for paso in instrucciones:
         texto = paso.get("text", "")
@@ -160,7 +159,7 @@ def imprimir_paso_a_paso(paths_data: Dict[str, Any]):
 def pedir(texto: str) -> str:
     valor = input(texto).strip()
     if salir_si_corresponde(valor):
-        print("Saliendo…")
+        print("Saliendo...")
         sys.exit(0)
     return valor
 
@@ -168,9 +167,9 @@ def pedir(texto: str) -> str:
 def main():
     api_key = obtener_api_key()
     if not api_key or len(api_key) < 10:
-        api_key = pedir("🔑 Escribe tu API Key de GraphHopper: ")
+        api_key = pedir("Escribe tu API Key de GraphHopper: ")
 
-    print("\n=== Configuración del viaje (casa ➜ sede) ===")
+    print("\n=== Configuración del viaje (casa a sede) ===")
     print("Puedes salir en cualquier momento escribiendo 's' o 'salir'.\n")
 
     print("Perfiles disponibles: car (auto), bike (bicicleta), foot (a pie)")
@@ -188,15 +187,15 @@ def main():
     if s1 == 200 and s2 == 200 and lat1 is not None and lat2 is not None:
         datos = rutear((lat1, lng1), (lat2, lng2), api_key, vehiculo)
         if "error" in datos:
-            print("❌ Error en el ruteo:", datos["error"])
+            print("Error en el ruteo:", datos["error"])
             print("*" * 60)
             sys.exit(1)
 
-        print("✅ Estado de la API de ruteo: 200")
+        print("Estado de la API de ruteo: 200")
         imprimir_resumen(datos, etq1, etq2, vehiculo)
         imprimir_paso_a_paso(datos)
     else:
-        print("❌ No fue posible geocodificar una o ambas direcciones. Intenta nuevamente.")
+        print("No fue posible geocodificar una o ambas direcciones. Intenta nuevamente.")
         print("*" * 60)
 
 
